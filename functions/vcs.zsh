@@ -26,19 +26,24 @@ function +vi-git-untracked() {
 }
 
 function +vi-git-aheadbehind() {
+    local tracking_branch=$(git for-each-ref --format='%(upstream:short)' "$(git symbolic-ref -q HEAD)" 2> /dev/null)
     local ahead behind branch_name
     local -a gitstatus
 
-    branch_name=$(git symbolic-ref --short HEAD 2>/dev/null)
+    #branch_name=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+    ahead=$(git rev-list ${tracking_branch}..HEAD | wc -l)
+    behind=$(git rev-list HEAD..${tracking_branch} | wc -l)
+ 
 
     # for git prior to 1.7
     # ahead=$(git rev-list origin/${branch_name}..HEAD | wc -l)
-    ahead=$(git rev-list "${branch_name}"@{upstream}..HEAD 2>/dev/null | wc -l)
+    #ahead=$(git rev-list "${branch_name}"@{upstream}..HEAD 2>/dev/null | wc -l)
     (( ahead )) && gitstatus+=( " $(print_icon 'VCS_OUTGOING_CHANGES_ICON')${ahead// /}" )
 
     # for git prior to 1.7
     # behind=$(git rev-list HEAD..origin/${branch_name} | wc -l)
-    behind=$(git rev-list HEAD.."${branch_name}"@{upstream} 2>/dev/null | wc -l)
+    #behind=$(git rev-list HEAD.."${branch_name}"@{upstream} 2>/dev/null | wc -l)
     (( behind )) && gitstatus+=( " $(print_icon 'VCS_INCOMING_CHANGES_ICON')${behind// /}" )
 
     hook_com[misc]+=${(j::)gitstatus}

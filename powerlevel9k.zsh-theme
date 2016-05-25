@@ -16,6 +16,36 @@
 # theming with simple variables defined in your `~/.zshrc`.
 ################################################################
 
+
+
+### CONFIG
+
+setopt notify
+setopt nopromptcr
+setopt inc_append_history
+setopt share_history
+
+
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(root_indicator context os_icon dir vcs)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status time)
+POWERLEVEL9K_TIME_FORMAT='%D{%H:%M}'
+POWERLEVEL9K_MODE='awesome-patched'
+POWERLEVEL9K_VCS_GIT_ICON='\Ue602 '
+POWERLEVEL9K_SHORTEN_DIR_LENGTH=3
+POWERLEVEL9K_SHORTEN_STRATEGY="truncate_middle"
+POWERLEVEL9K_STATUS_VERBOSE=false
+POWERLEVEL9K_VCS_UNTRACKED_ICON='\Uf12a '
+POWERLEVEL9K_VCS_UNSTAGED_ICON='\Uf013 '
+POWERLEVEL9K_VCS_INCOMING_CHANGES_ICON='\Uf063 '
+POWERLEVEL9K_VCS_OUTGOING_CHANGES_ICON='\Uf062 '
+POWERLEVEL9K_VCS_MODIFIED_BACKGROUND='yellow'
+POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND='yellow'
+####
+
+
+
+
+
 ## Turn on for Debugging
 #zstyle ':vcs_info:*+*:*' debug true
 #set -o xtrace
@@ -846,8 +876,8 @@ prompt_vcs() {
   # Load VCS_INFO
   autoload -Uz vcs_info
 
-  VCS_WORKDIR_DIRTY=false
-  VCS_WORKDIR_HALF_DIRTY=false
+  VCS_WORKDIR_DIRTY=true
+  VCS_WORKDIR_HALF_DIRTY=true
 
   # The vcs segment can have three different states - defaults to 'clean'.
   local current_state=""
@@ -855,7 +885,7 @@ prompt_vcs() {
   vcs_states=(
     'clean'         'green'
     'modified'      'yellow'
-    'untracked'     'green'
+    'untracked'     'yellow'
   )
 
   VCS_CHANGESET_PREFIX=''
@@ -885,6 +915,7 @@ prompt_vcs() {
   zstyle ':vcs_info:hg*:*' get-revision true
   zstyle ':vcs_info:hg*:*' get-bookmarks true
   zstyle ':vcs_info:hg*+gen-hg-bookmark-string:*' hooks hg-bookmarks
+  zstyle ':vcs_info:git*+set-message:*' hooks git-st
 
   if [[ "$POWERLEVEL9K_SHOW_CHANGESET" == true ]]; then
     zstyle ':vcs_info:*' get-revision true
@@ -994,7 +1025,7 @@ $(print_icon 'MULTILINE_SECOND_PROMPT_PREFIX')"
       # the RPROMPT, we advise it, to go one line up. At the end of RPROMPT, we
       # advise it to go one line down. See:
       # http://superuser.com/questions/357107/zsh-right-justify-in-ps1
-      local LC_ALL="" LC_CTYPE="en_US.UTF-8" # Set the right locale to protect special characters
+      local LC_ALL="" LC_CTYPE="de_DE.UTF-8" # Set the right locale to protect special characters
       RPROMPT_PREFIX='%{'$'\e[1A''%}' # one line up
       RPROMPT_SUFFIX='%{'$'\e[1B''%}' # one line down
     else
