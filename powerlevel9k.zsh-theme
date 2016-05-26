@@ -14,9 +14,144 @@
 #
 # There are a lot of easy ways you can customize your prompt segments and
 # theming with simple variables defined in your `~/.zshrc`.
+#   POWERLEVEL9K_TIME_FORMAT='%D{%S:%M:%H}'
+#
+# Show the hash/changeset string in the `vcs` segment:
+#   POWERLEVEL9K_SHOW_CHANGESET=true
+# Set the length of the hash/changeset if enabled in the `vcs` segment:
+#   POWERLEVEL9K_CHANGESET_HASH_LENGTH=6
+#
+# Make powerlevel9k a double-lined prompt:
+#   POWERLEVEL9K_PROMPT_ON_NEWLINE=true
+#
+# Set the colorscheme:
+#   POWERLEVEL9K_COLOR_SCHEME='light'
 ################################################################
 
+## Debugging
+#zstyle ':vcs_info:*+*:*' debug true
+#set -o xtrace
 
+# These characters require the Powerline fonts to work properly. If see boxes or
+# bizarre characters below, your fonts are not correctly installed. If you
+# do not want to install a special font, you can set `POWERLEVEL9K_MODE` to
+# `compatible`. This shows all icons in regular symbols.
+case $POWERLEVEL9K_MODE in
+  'flat')
+    # Awesome-Patched Font required!
+    # See https://github.com/gabrielelana/awesome-terminal-fonts/tree/patching-strategy/patched
+    LEFT_SEGMENT_SEPARATOR=''
+    RIGHT_SEGMENT_SEPARATOR=''
+    ROOT_ICON="\uE801" # 
+    RUBY_ICON="\uE847" # 
+    AWS_ICON="\uE895" # 
+    BACKGROUND_JOBS_ICON="\uE82F " # 
+    TEST_ICON="\uE891" # 
+    OK_ICON="\u2713" # ✓
+    FAIL_ICON="\u2718" # ✘
+    SYMFONY_ICON="SF"
+    VCS_UNTRACKED_ICON="\uE16C" # 
+    VCS_UNSTAGED_ICON="\uE17C" # 
+    VCS_STAGED_ICON="\uE168" # 
+    VCS_STASH_ICON="\uE133 " # 
+    #VCS_INCOMING_CHANGES="\uE1EB " # 
+    #VCS_INCOMING_CHANGES="\uE80D " # 
+    VCS_INCOMING_CHANGES="\uE131 " # 
+    #VCS_OUTGOING_CHANGES="\uE1EC " # 
+    #VCS_OUTGOING_CHANGES="\uE80E " # 
+    VCS_OUTGOING_CHANGES="\uE132 " # 
+    VCS_TAG_ICON="\uE817 " # 
+    VCS_BOOKMARK_ICON="\uE87B" # 
+    VCS_COMMIT_ICON="\uE821 " # 
+    VCS_BRANCH_ICON=" \uE220" # 
+    VCS_REMOTE_BRANCH_ICON="\uE804" # 
+    VCS_GIT_ICON="\uE20E " # 
+    VCS_HG_ICON="\uE1C3 " # 
+  ;;
+  'compatible')
+    LEFT_SEGMENT_SEPARATOR="\u2B80" # ⮀
+    RIGHT_SEGMENT_SEPARATOR="\u2B82" # ⮂
+    ROOT_ICON="\u26A1" # ⚡
+    RUBY_ICON=''
+    AWS_ICON="AWS:"
+    BACKGROUND_JOBS_ICON="\u2699" # ⚙
+    TEST_ICON=''
+    OK_ICON="\u2713" # ✓
+    FAIL_ICON="\u2718" # ✘
+    SYMFONY_ICON="SF"
+    VCS_UNTRACKED_ICON='?'
+    VCS_UNSTAGED_ICON="\u25CF" # ●
+    VCS_STAGED_ICON="\u271A" # ✚
+    VCS_STASH_ICON="\u235F" # ⍟
+    VCS_INCOMING_CHANGES="\u2193" # ↓
+    VCS_OUTGOING_CHANGES="\u2191" # ↑
+    VCS_TAG_ICON=''
+    VCS_BOOKMARK_ICON="\u263F" # ☿
+    VCS_COMMIT_ICON=''
+    VCS_BRANCH_ICON='@'
+    VCS_REMOTE_BRANCH_ICON="\u2192" # →
+    VCS_GIT_ICON='Git'
+    VCS_HG_ICON='HG'
+  ;;
+  'awesome-patched')
+    # Awesome-Patched Font required!
+    # See https://github.com/gabrielelana/awesome-terminal-fonts/tree/patching-strategy/patched
+    LEFT_SEGMENT_SEPARATOR="\uE0B0" # 
+    RIGHT_SEGMENT_SEPARATOR="\uE0B2" # 
+    ROOT_ICON="\u26A1" # ⚡
+    RUBY_ICON="\uE847" # 
+    AWS_ICON="\uE895" # 
+    BACKGROUND_JOBS_ICON="\uE82F " # 
+    TEST_ICON="\uE891" # 
+    OK_ICON="\u2713" # ✓
+    FAIL_ICON="\u2718" # ✘
+    SYMFONY_ICON="SF"
+    VCS_UNTRACKED_ICON="\uE16C" # 
+    VCS_UNSTAGED_ICON="\uE17C" # 
+    VCS_STAGED_ICON="\uE168" # 
+    VCS_STASH_ICON="\uE133 " # 
+    #VCS_INCOMING_CHANGES="\uE1EB " # 
+    #VCS_INCOMING_CHANGES="\uE80D " # 
+    VCS_INCOMING_CHANGES="\uE131 " # 
+    #VCS_OUTGOING_CHANGES="\uE1EC " # 
+    #VCS_OUTGOING_CHANGES="\uE80E " # 
+    VCS_OUTGOING_CHANGES="\uE132 " # 
+    VCS_TAG_ICON="\uE817 " # 
+    VCS_BOOKMARK_ICON="\uE87B" # 
+    VCS_COMMIT_ICON="\uE821 " # 
+    VCS_BRANCH_ICON=" \uE220" # 
+    VCS_REMOTE_BRANCH_ICON="\uE804" # 
+    VCS_GIT_ICON="\uE20E " # 
+    VCS_HG_ICON="\uE1C3 " # 
+  ;;
+  *)
+    # Powerline-Patched Font required!
+    # See https://github.com/Lokaltog/powerline-fonts
+    LEFT_SEGMENT_SEPARATOR="\uE0B0" # 
+    RIGHT_SEGMENT_SEPARATOR="\uE0B2" # 
+    ROOT_ICON="\u26A1" # ⚡
+    RUBY_ICON=''
+    AWS_ICON="AWS:"
+    BACKGROUND_JOBS_ICON="\u2699" # ⚙
+    TEST_ICON=''
+    OK_ICON="\u2713" # ✓
+    FAIL_ICON="\u2718" # ✘
+    SYMFONY_ICON="SF"
+    VCS_UNTRACKED_ICON='?'
+    VCS_UNSTAGED_ICON="\u25CF" # ●
+    VCS_STAGED_ICON="\u271A" # ✚
+    VCS_STASH_ICON="\u235F" # ⍟
+    VCS_INCOMING_CHANGES="\u2193" # ↓
+    VCS_OUTGOING_CHANGES="\u2191" # ↑
+    VCS_TAG_ICON=''
+    VCS_BOOKMARK_ICON="\u263F" # ☿
+    VCS_COMMIT_ICON=''
+    VCS_BRANCH_ICON='@'
+    VCS_REMOTE_BRANCH_ICON="\u2192" # →
+    VCS_GIT_ICON="\uE0A0" # 
+    VCS_HG_ICON="\uE0A0" # 
+  ;;
+esac
 
 ### CONFIG
 
@@ -104,8 +239,8 @@ source $script_location/functions/icons.zsh
 source $script_location/functions/utilities.zsh
 
 ################################################################
-# Source color functions
-################################################################
+zstyle ':vcs_info:git:*' formats "%F{$VCS_FOREGROUND_COLOR}$VCS_GIT_ICON%f $VCS_DEFAULT_FORMAT"
+zstyle ':vcs_info:hg:*' formats "%F{$VCS_FOREGROUND_COLOR}$VCS_HG_ICON%f $VCS_DEFAULT_FORMAT"
 
 source $script_location/functions/colors.zsh
 
@@ -163,6 +298,7 @@ left_prompt_segment() {
   segmentShouldBeJoined $current_index $last_left_element_index "$POWERLEVEL9K_LEFT_PROMPT_ELEMENTS" && joined=true || joined=false
 
   # Overwrite given background-color by user defined variable for this segment.
+  # We get as first Parameter the function name, which called this function.
   local BACKGROUND_USER_VARIABLE=POWERLEVEL9K_${(U)1#prompt_}_BACKGROUND
   local BG_COLOR_MODIFIER=${(P)BACKGROUND_USER_VARIABLE}
   [[ -n $BG_COLOR_MODIFIER ]] && 3="$BG_COLOR_MODIFIER"
@@ -429,7 +565,7 @@ prompt_battery() {
     [[ $(cat $bat/capacity) -gt 100 ]] && local bat_percent=100 || local bat_percent=$(cat $bat/capacity)
     [[ $(cat $bat/status) =~ Charging ]] && local connected=true
     [[ $(cat $bat/status) =~ Charging && $bat_percent =~ 100 ]] && current_state="charged"
-    [[ $(cat $bat/status) =~ Charging && $bat_percent -lt 100 ]] && current_state="charging"
+  if [[ -n "$aws_profile" ]];
     if [[ -z  $connected ]]; then
       [[ $bat_percent -lt $POWERLEVEL9K_BATTERY_LOW_THRESHOLD ]] && current_state="low" || current_state="disconnected"
     fi
@@ -1031,8 +1167,8 @@ powerlevel9k_prepare_prompts() {
   RETVAL=$?
   RPROMPT=""
   if [[ "$POWERLEVEL9K_PROMPT_ON_NEWLINE" == true ]]; then
-    PROMPT="$(print_icon 'MULTILINE_FIRST_PROMPT_PREFIX')%f%b%k$(build_left_prompt)
-$(print_icon 'MULTILINE_SECOND_PROMPT_PREFIX')"
+    PROMPT='%{%f%b%k%}$(build_left_prompt)
+  » '
     if [[ "$POWERLEVEL9K_RPROMPT_ON_NEWLINE" != true ]]; then
       # The right prompt should be on the same line as the first line of the left
       # prompt.  To do so, there is just a quite ugly workaround: Before zsh draws
@@ -1043,10 +1179,12 @@ $(print_icon 'MULTILINE_SECOND_PROMPT_PREFIX')"
       RPROMPT_PREFIX='%{'$'\e[1A''%}' # one line up
       RPROMPT_SUFFIX='%{'$'\e[1B''%}' # one line down
     else
+    PROMPT='%{%f%b%k%}$(build_left_prompt)'
       RPROMPT_PREFIX=''
       RPROMPT_SUFFIX=''
     fi
   else
+  RPROMPT=$RPROMPT_PREFIX'%{%f%b%k%}$(build_right_prompt)%{$reset_color%}'$RPROMPT_SUFFIX
     PROMPT="%f%b%k$(build_left_prompt)"
     RPROMPT_PREFIX=''
     RPROMPT_SUFFIX=''
