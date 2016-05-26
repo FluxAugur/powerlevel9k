@@ -8,9 +8,28 @@
 ################################################################
 
 ################################################################
+<<<<<<< HEAD
 # For basic documentation, please refer to the README.md in the top-level
 # directory. For more detailed documentation, refer to the project wiki, hosted
 # on Github: https://github.com/bhilburn/powerlevel9k/wiki
+=======
+# Please see the README file located in the source repository for full docs.
+# What follows is a brief list of the settings variables used by this theme.
+# You should define these variables in your `~/.zshrc`.
+#
+# Customize which segments appear in which prompts (below is also the default):
+#   POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(context dir rbenv vcs)
+#   POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status history time)
+#
+# Set your Amazon Web Services profile for the `aws` segment:
+#   export AWS_DEFAULT_PROFILE=<profile_name>
+#
+# Set your username for the `context` segment:
+#   export DEFAULT_USER=<your username>
+#
+# Customize the format of the time segment. Example of reverse format:
+#   POWERLEVEL9K_TIME_FORMAT='%D{%S:%M:%H}'
+>>>>>>> e8267c14f5b640bd63afcd3c151355503478197d
 #
 # There are a lot of easy ways you can customize your prompt segments and
 # theming with simple variables defined in your `~/.zshrc`.
@@ -103,9 +122,15 @@ source $script_location/functions/icons.zsh
 
 source $script_location/functions/utilities.zsh
 
+<<<<<<< HEAD
 ################################################################
 # Source color functions
 ################################################################
+=======
+VCS_DEFAULT_FORMAT="$VCS_CHANGESET_PREFIX%F{$VCS_FOREGROUND_COLOR}%b%c%u%m%f"
+zstyle ':vcs_info:git:*' formats "%F{$VCS_FOREGROUND_COLOR}$VCS_GIT_ICON%f $VCS_DEFAULT_FORMAT"
+zstyle ':vcs_info:hg:*' formats "%F{$VCS_FOREGROUND_COLOR}$VCS_HG_ICON%f $VCS_DEFAULT_FORMAT"
+>>>>>>> e8267c14f5b640bd63afcd3c151355503478197d
 
 source $script_location/functions/colors.zsh
 
@@ -163,6 +188,14 @@ left_prompt_segment() {
   segmentShouldBeJoined $current_index $last_left_element_index "$POWERLEVEL9K_LEFT_PROMPT_ELEMENTS" && joined=true || joined=false
 
   # Overwrite given background-color by user defined variable for this segment.
+<<<<<<< HEAD
+=======
+  # We get as first Parameter the function name, which called this function.
+  # From the given function name, we strip the "prompt_"-prefix and uppercase it.
+  # This is, prefixed with "POWERLEVEL9K_" and suffixed with either "_BACKGROUND"
+  # of "_FOREGROUND", our variable name. So each new Segment should automatically
+  # be overwritable by a variable following this naming convention.
+>>>>>>> e8267c14f5b640bd63afcd3c151355503478197d
   local BACKGROUND_USER_VARIABLE=POWERLEVEL9K_${(U)1#prompt_}_BACKGROUND
   local BG_COLOR_MODIFIER=${(P)BACKGROUND_USER_VARIABLE}
   [[ -n $BG_COLOR_MODIFIER ]] && 3="$BG_COLOR_MODIFIER"
@@ -451,9 +484,18 @@ prompt_battery() {
     message="$bat_percent%%$remain"
   fi
 
+<<<<<<< HEAD
   # Draw the prompt_segment
   if [[ -n $bat_percent ]]; then
     "$1_prompt_segment" "${0}_${current_state}" "$2" "$DEFAULT_COLOR" "${battery_states[$current_state]}" "$message" 'BATTERY_ICON'
+=======
+# AWS Profile
+prompt_aws() {
+  local aws_profile="$AWS_DEFAULT_PROFILE"
+  if [[ -n "$aws_profile" ]];
+  then
+    $1_prompt_segment "$0" red white "$AWS_ICON $aws_profile"
+>>>>>>> e8267c14f5b640bd63afcd3c151355503478197d
   fi
 }
 
@@ -726,10 +768,6 @@ prompt_chruby() {
   # Don't show anything if the chruby did not change the default ruby
   if [[ "${chrb_env:-system}" != "system" ]]; then
     "$1_prompt_segment" "$0" "$2" "red" "$DEFAULT_COLOR" "${chrb_env}" 'RUBY_ICON'
-=======
-  if which rbenv &> /dev/null; then
-    "$1_prompt_segment" "$0" "$2" "red" "$DEFAULT_COLOR" "$(rbenv version-name)" 'RUBY_ICON'
->>>>>>> 96a8408a0c27ed6dc10dfa8829a549419ab5d4ec
   fi
 }
 
@@ -1008,18 +1046,32 @@ build_right_prompt() {
     # Check if it is a custom command, otherwise interpet it as
     # a prompt.
     if [[ $element[0,7] =~ "custom_" ]]; then
-      "prompt_custom" "right" "$index" $element[8,-1]
+      "prompt_custom" "right" "$index" $element[8,-1] >> $socket
     else
-      "prompt_$element" "right" "$index"
+      "prompt_$element" "right" "$index" >> $socket
     fi
 
     index=$((index + 1))
+    if [[ "$POWERLEVEL9K_RPROMPT_RENDER_ASAP" == true ]]; then
+      kill -s USR1 $$
+    fi
   done
+  if [[ "$POWERLEVEL9K_RPROMPT_RENDER_ASAP" != true ]]; then
+    kill -s USR1 $$
+  fi
 }
 
+if [[ "$POWERLEVEL9K_DISABLE_RPROMPT" != true ]]; then
+  ASYNC_PROC=0
+  socket=$(mktemp)
+  async() {
+    : >! $socket #reset file
+    build_right_prompt
+  }
+fi
 powerlevel9k_prepare_prompts() {
   RETVAL=$?
-
+  RPROMPT=""
   if [[ "$POWERLEVEL9K_PROMPT_ON_NEWLINE" == true ]]; then
     PROMPT="$(print_icon 'MULTILINE_FIRST_PROMPT_PREFIX')%f%b%k$(build_left_prompt)
 $(print_icon 'MULTILINE_SECOND_PROMPT_PREFIX')"
@@ -1041,10 +1093,28 @@ $(print_icon 'MULTILINE_SECOND_PROMPT_PREFIX')"
     RPROMPT_PREFIX=''
     RPROMPT_SUFFIX=''
   fi
-
   if [[ "$POWERLEVEL9K_DISABLE_RPROMPT" != true ]]; then
-    RPROMPT="$RPROMPT_PREFIX%f%b%k$(build_right_prompt)%{$reset_color%}$RPROMPT_SUFFIX"
+    # kill previous async
+    if [[ "${ASYNC_PROC}" != 0 ]]; then
+      kill -TERM $ASYNC_PROC >/dev/null 2>&1
+    fi
+    async &!
+    ASYNC_PROC=$!
   fi
+}
+
+tidy() {
+  rm -f $socket
+  unset $socket
+}
+trap tidy EXIT
+
+TRAPUSR1() {
+  RPROMPT="$(cat $socket)"
+  RPROMPT="$RPROMPT_PREFIX%f%b%k$RPROMPT%{$reset_color%}$RPROMPT_SUFFIX"
+  #: > $socket #reset file
+  # redisplay
+  zle && zle reset-prompt
 }
 
 function zle-line-init {
@@ -1052,7 +1122,7 @@ function zle-line-init {
   if (( ${+terminfo[smkx]} )); then
     printf '%s' ${terminfo[smkx]}
   fi
-  zle reset-prompt
+  #zle reset-prompt
   zle -R
 }
 
@@ -1061,13 +1131,13 @@ function zle-line-finish {
   if (( ${+terminfo[rmkx]} )); then
     printf '%s' ${terminfo[rmkx]}
   fi
-  zle reset-prompt
+  #zle reset-prompt
   zle -R
 }
 
 function zle-keymap-select {
   powerlevel9k_prepare_prompts
-  zle reset-prompt
+  #zle reset-prompt
   zle -R
 }
 
@@ -1102,8 +1172,29 @@ powerlevel9k_init() {
   # initialize hooks
   autoload -Uz add-zsh-hook
 
+<<<<<<< HEAD
   # prepare prompts
   add-zsh-hook precmd powerlevel9k_prepare_prompts
+=======
+  add-zsh-hook precmd vcs_info
+
+  if [[ "$POWERLEVEL9K_PROMPT_ON_NEWLINE" == true ]]; then
+    PROMPT='%{%f%b%k%}$(build_left_prompt)
+  » '
+    # The right prompt should be on the same line as the first line of the left
+    # prompt.  To do so, there is just a quite ugly workaround: Before zsh draws
+    # the RPROMPT, we advise it, to go one line up. At the end of RPROMPT, we
+    # advise it to go one line down. See:
+    # http://superuser.com/questions/357107/zsh-right-justify-in-ps1
+    RPROMPT_PREFIX='%{'$'\e[1A''%}' # one line up
+    RPROMPT_SUFFIX='%{'$'\e[1B''%}' # one line down
+  else
+    PROMPT='%{%f%b%k%}$(build_left_prompt)'
+    RPROMPT_PREFIX=''
+    RPROMPT_SUFFIX=''
+  fi
+  RPROMPT=$RPROMPT_PREFIX'%{%f%b%k%}$(build_right_prompt)%{$reset_color%}'$RPROMPT_SUFFIX
+>>>>>>> e8267c14f5b640bd63afcd3c151355503478197d
 
   zle -N zle-line-init
   zle -N zle-line-finish
