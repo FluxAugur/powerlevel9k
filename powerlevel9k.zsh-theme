@@ -671,33 +671,46 @@ prompt_dir() {
 
   fi
 
-  local current_icon=''
-  if [[ $(print -P "%~") == '~' ]]; then
-    "$1_prompt_segment" "$0_HOME" "$2" "blue" "$DEFAULT_COLOR" "$current_path" 'HOME_ICON'
-  elif [[ $(print -P "%~") == '~'* ]]; then
-    "$1_prompt_segment" "$0_HOME_SUBFOLDER" "$2" "blue" "$DEFAULT_COLOR" "$current_path" 'HOME_SUB_ICON'
-  else
-    "$1_prompt_segment" "$0_DEFAULT" "$2" "blue" "$DEFAULT_COLOR" "$current_path" 'FOLDER_ICON'
-  fi
+  "$1_prompt_segment" "$0" "black" "white" "$(print_icon 'HOME_ICON')$current_path"
 }
 
-# Docker machine
-prompt_docker_machine() {
-  local docker_machine="$DOCKER_MACHINE_NAME"
+# power: power status
+prompt_power() {
 
-  if [[ -n "$docker_machine" ]]; then
-    "$1_prompt_segment" "$0" "$2" "magenta" "$DEFAULT_COLOR" "$docker_machine" 'SERVER_ICON'
+  POWERNOW_FILE='/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0A:00/power_supply/BAT0/charge_now'
+  POWERFULL_FILE='/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0A:00/power_supply/BAT0/charge_full'
+  STATUS_FILE='/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0A:00/power_supply/BAT0/status'
+
+  # http://stackoverflow.com/questions/8654051/how-to-compare-two-floating-point-numbers-in-a-bash-script
+  POWER=$( echo "scale=2; 100 * $( cat $POWERNOW_FILE ) / $( cat $POWERFULL_FILE )" | bc -l )
+ 
+  GREEN="66"
+  YELLOW="33"
+
+  POWER_GREEN=$( echo "$POWER > $GREEN" | bc)
+  POWER_YELLOW=$( echo "$POWER > $YELLOW" | bc )
+  
+  BAT_COLOR="red"
+  if [[ "$POWER_YELLOW" == "1" ]]; then
+    BAT_COLOR="yellow"
   fi
-}
-
-# GO prompt
-prompt_go_version() {
-  local go_version
-  go_version=$(go version 2>/dev/null | sed -E "s/.*(go[0-9.]*).*/\1/")
-
-  if [[ -n "$go_version" ]]; then
-    "$1_prompt_segment" "$0" "$2" "green" "255" "$go_version"
+  if [[ "$POWER_GREEN" == "1" ]]; then
+    BAT_COLOR="green"
   fi
+
+  BAT_STATUS="U"
+  BAT_READING=$(cat $STATUS_FILE)
+  if [[ "$BAT_READING" == "Full" ]]; then
+    BAT_STATUS="F"
+  fi
+  if [[ "$BAT_READING" == "Charging" ]]; then
+    BAT_STATUS="P"
+  fi
+  if [[ "$BAT_READING" == "Discharging" ]]; then
+    BAT_STATUS="B"
+  fi
+
+  "$1_prompt_segment" "$0" "black" "$BAT_COLOR" "$BAT_STATUS $POWER %"
 }
 
 # Command number (in local history)
@@ -745,6 +758,7 @@ prompt_ip() {
   "$1_prompt_segment" "$0" "$2" "cyan" "$DEFAULT_COLOR" "$ip" 'NETWORK_ICON'
 }
 
+set_default POWERLEVEL9K_LOAD_SHOW_FREE_RAM true
 prompt_load() {
   # The load segment can have three different states
   local current_state="unknown"
@@ -760,9 +774,21 @@ prompt_load() {
   if [[ "$OS" == "OSX" ]]; then
     load_avg_1min=$(sysctl vm.loadavg | grep -o -E '[0-9]+(\.|,)[0-9]+' | head -n 1)
     cores=$(sysctl -n hw.logicalcpu)
+    load_avg_5min=$(sysctl vm.loadavg | grep -o -E '[0-9]+(\.|,)[0-9]+' | head -n 1)
+    if [[ "$POWERLEVEL9K_LOAD_SHOW_FREE_RAM" == true ]]; then
+      ramfree=$(vm_stat | grep "Pages free" | grep -o -E '[0-9]+')
+      # Convert pages into Bytes
+      ramfree=$(( ramfree * 4096 ))
+      base=''
+    fi
   else
     load_avg_1min=$(grep -o "[0-9.]*" /proc/loadavg | head -n 1)
     cores=$(nproc)
+    load_avg_5min=$(grep -o "[0-9.]*" /proc/loadavg | head -n 1)
+    if [[ "$POWERLEVEL9K_LOAD_SHOW_FREE_RAM" == true ]]; then
+      ramfree=$(grep -o -E "MemFree:\s+[0-9]+" /proc/meminfo | grep -o "[0-9]*")
+      base=K
+    fi
   fi
 
   # Replace comma
@@ -772,8 +798,16 @@ prompt_load() {
     current_state="critical"
   elif [[ "$load_avg_1min" -gt $(bc -l <<< "${cores} * 0.5") ]]; then
     current_state="warning"
+  if [[ "$load_avg_5min" -gt 10 ]]; then
+    BACKGROUND_COLOR="red"
+    FUNCTION_SUFFIX="_CRITICAL"
+  elif [[ "$load_avg_5min" -gt 3 ]]; then
+    BACKGROUND_COLOR="yellow"
+    FUNCTION_SUFFIX="_WARNING"
   else
     current_state="normal"
+    BACKGROUND_COLOR="green"
+    FUNCTION_SUFFIX="_NORMAL"
   fi
 
   "$1_prompt_segment" "${0}_${current_state}" "$2" "${load_states[$current_state]}" "$DEFAULT_COLOR" "$load_avg_1min" 'LOAD_ICON'
@@ -783,6 +817,9 @@ prompt_load() {
 prompt_node_version() {
   local node_version=$(node -v 2>/dev/null)
   [[ -z "${node_version}" ]] && return
+  local nvm_prompt
+  nvm_prompt=$(node -v 2>/dev/null)
+  [[ -z "${nvm_prompt}" ]] && return
 
   "$1_prompt_segment" "$0" "$2" "green" "white" "${node_version:1}" 'NODE_ICON'
 }
