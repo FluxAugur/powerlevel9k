@@ -123,3 +123,4 @@ function +vi-vcs-detect-changes() {
     VCS_WORKDIR_DIRTY=false
   fi
 }
+
