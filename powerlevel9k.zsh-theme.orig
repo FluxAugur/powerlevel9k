@@ -671,6 +671,7 @@ prompt_dir() {
 
   fi
 
+<<<<<<< HEAD
   local current_icon=''
   if [[ $(print -P "%~") == '~' ]]; then
     "$1_prompt_segment" "$0_HOME" "$2" "blue" "$DEFAULT_COLOR" "$current_path" 'HOME_ICON'
@@ -698,6 +699,48 @@ prompt_go_version() {
   if [[ -n "$go_version" ]]; then
     "$1_prompt_segment" "$0" "$2" "green" "255" "$go_version"
   fi
+=======
+  "$1_prompt_segment" "$0" "black" "white" "$(print_icon 'HOME_ICON')$current_path"
+}
+
+# power: power status
+prompt_power() {
+
+  POWERNOW_FILE='/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0A:00/power_supply/BAT0/charge_now'
+  POWERFULL_FILE='/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0A:00/power_supply/BAT0/charge_full'
+  STATUS_FILE='/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0A:00/power_supply/BAT0/status'
+
+  # http://stackoverflow.com/questions/8654051/how-to-compare-two-floating-point-numbers-in-a-bash-script
+  POWER=$( echo "scale=2; 100 * $( cat $POWERNOW_FILE ) / $( cat $POWERFULL_FILE )" | bc -l )
+ 
+  GREEN="66"
+  YELLOW="33"
+
+  POWER_GREEN=$( echo "$POWER > $GREEN" | bc)
+  POWER_YELLOW=$( echo "$POWER > $YELLOW" | bc )
+  
+  BAT_COLOR="red"
+  if [[ "$POWER_YELLOW" == "1" ]]; then
+    BAT_COLOR="yellow"
+  fi
+  if [[ "$POWER_GREEN" == "1" ]]; then
+    BAT_COLOR="green"
+  fi
+
+  BAT_STATUS="U"
+  BAT_READING=$(cat $STATUS_FILE)
+  if [[ "$BAT_READING" == "Full" ]]; then
+    BAT_STATUS="F"
+  fi
+  if [[ "$BAT_READING" == "Charging" ]]; then
+    BAT_STATUS="P"
+  fi
+  if [[ "$BAT_READING" == "Discharging" ]]; then
+    BAT_STATUS="B"
+  fi
+
+  "$1_prompt_segment" "$0" "black" "$BAT_COLOR" "$BAT_STATUS $POWER %"
+>>>>>>> 4163b98e3aad0c3d86a8e8a9f713ec949e190142
 }
 
 # Command number (in local history)
@@ -1026,17 +1069,7 @@ prompt_vcs() {
 
   VCS_CHANGESET_PREFIX=''
   if [[ "$POWERLEVEL9K_SHOW_CHANGESET" == true ]]; then
-<<<<<<< HEAD
     VCS_CHANGESET_PREFIX="$(print_icon 'VCS_COMMIT_ICON')%0.$POWERLEVEL9K_VCS_INTERNAL_HASH_LENGTH""i "
-=======
-    # Default: Just display the first 12 characters of our changeset-ID.
-    local VCS_CHANGESET_HASH_LENGTH=12
-    if [[ -n "$POWERLEVEL9K_CHANGESET_HASH_LENGTH" ]]; then
-      VCS_CHANGESET_HASH_LENGTH="$POWERLEVEL9K_CHANGESET_HASH_LENGTH"
-    fi
-
-    VCS_CHANGESET_PREFIX="%F{$POWERLEVEL9K_VCS_DARK_FOREGROUND}$(print_icon 'VCS_COMMIT_ICON')\e[3m%0.$VCS_CHANGESET_HASH_LENGTH""i\e[23m%f "
->>>>>>> 1f1ace831bdf489bbb4eba1735a64bb2c1363c26
   fi
 
   zstyle ':vcs_info:*' enable git hg
