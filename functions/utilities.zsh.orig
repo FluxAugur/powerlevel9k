@@ -138,6 +138,7 @@ print_deprecation_warning() {
   done
 }
 
+<<<<<<< HEAD
 # A helper function to determine if a segment should be
 # joined or promoted to a full one.
 # Takes three arguments:
@@ -192,4 +193,5 @@ function segmentShouldBeJoined() {
 function truncatePathFromRight() {
   echo $1 | sed $SED_EXTENDED_REGEX_PARAMETER "s/([^/]{$POWERLEVEL9K_SHORTEN_DIR_LENGTH})[^/]+\//\1$POWERLEVEL9K_SHORTEN_DELIMITER\//g"
 }
-
+=======
+>>>>>>> 1f1ace831bdf489bbb4eba1735a64bb2c1363c26
